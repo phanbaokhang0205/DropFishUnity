@@ -1,15 +1,24 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-
+/**
+ * Tạo objectPooler để tối ưu khi tạo và xóa nhiều đối tượng.
+ * Cơ chế: 
+ *     Trong hàm Start, tạo sẵn 1 ds chứa các obj cần dùng (setActive = false)
+ *  -> tạo hàm private GameObject GetFishFromPool() để mở các object cần sử dụng (setActive = true)
+ *  -> cái nào không dùng nữa thì tắt nó đi (setActive = false).
+ */
 public class FishManager : MonoBehaviour
 {
-    public static FishManager Instance { get; private set; }
+    public static FishManager Instance;
 
     public GameObject[] fishPrefabs;
-    public List<GameObject> droppedFishes;
-    public Rigidbody2D fishRb = null;
+    //public List<GameObject> droppedFishes;
     public GameObject chosenFish = null;
-    public bool nextFish;
+    public Fish fishScript;
+
+    //Tạo ds fishPool và số lượng
+    private List<GameObject> fishPool = new List<GameObject>();
+    public int poolSize = 10;
 
     private string oldTag;
     private string newTag;
@@ -35,71 +44,67 @@ public class FishManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        Instance = this;
     }
 
     private void Start()
     {
-        droppedFishes = new List<GameObject>();
+        //droppedFishes = new List<GameObject>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        //nextFish = false;
+
+        //Tạo random trc 10 con cá sau đó ẩn đi để sử dụng sau này.
+        for (int i = 0; i < poolSize; i++)
+        {
+            int randomIndex = Random.Range(0, 4);
+            GameObject fish = Instantiate(fishPrefabs[randomIndex]);
+            fish.SetActive(false);
+            fishPool.Add(fish);
+        }
+
     }
 
     private void Update()
     {
-        //nextFish = !chosenFish;
+        if (fishScript.inWater)
+        {
+            chosenFish = null;
+        }
     }
 
     public void CreateFish(Vector3 spawnPosition)
     {
-        if (fishPrefabs.Length == 0) return;
-
         int randomIndex = Random.Range(0, 4);
-        GameObject newFish = Instantiate(fishPrefabs[randomIndex], spawnPosition, Quaternion.identity);
+        GameObject newFish = GetFishFromPool(spawnPosition);
+        newFish.transform.position = spawnPosition;
+        newFish.SetActive(true);
 
         chosenFish = newFish;
-        fishRb = chosenFish.GetComponent<Rigidbody2D>();
+        fishScript = newFish.GetComponent<Fish>();
+        fishScript.prepareToDrop();
 
-        fishRb.gravityScale = 0;
-        fishRb.constraints |= RigidbodyConstraints2D.FreezeRotation;
-
-        newFish.transform.parent = this.transform;
     }
 
     public void addToDroppedFishes()
     {
-        fishRb.gravityScale = 1;
-        fishRb.constraints &= ~RigidbodyConstraints2D.FreezeRotation;
-        droppedFishes.Add(chosenFish);
-
-        chosenFish = null;
-        fishRb = null;
+        fishScript.dropped();
     }
 
     public void movingFish(Vector3 touchPosition)
     {
         chosenFish.transform.position = touchPosition;
-        fishRb.gravityScale = 0;
-        fishRb.constraints |= RigidbodyConstraints2D.FreezeRotation;
+        fishScript.prepareToDrop();
+
     }
 
     public void MergeFish(GameObject collision1, GameObject collision2)
     {
         if (collision1.tag == collision2.tag)
         {
-            //fishManager.MergeFish(gameObject, collision.gameObject);
+
             if (collision1.transform.position.y > collision2.transform.position.y)
             {
-                Destroy(collision1);
-                droppedFishes.Remove(collision1);
+                //Ẩn đi
+                collision1.SetActive(false);
 
 
                 collision2.transform.localScale *= 1.2f;
@@ -113,13 +118,13 @@ public class FishManager : MonoBehaviour
     void SplitTag(string tag, GameObject newFish)
     {
         oldTag = tag;
-        string[] parts = oldTag.Split('_'); // Tách chuỗi thành ["fish", "1"]
+        string[] parts = oldTag.Split('_');
 
-        if (parts.Length == 2) // Kiểm tra có đúng định dạng "fish_x"
+        if (parts.Length == 2)
         {
-            newTagIndex = int.Parse(parts[1]); // Lấy số
-            newTagIndex++; // Tăng số lên 1
-            newTag = parts[0] + "_" + newTagIndex; // Ghép lại thành "fish_2"
+            newTagIndex = int.Parse(parts[1]);
+            newTagIndex++;
+            newTag = parts[0] + "_" + newTagIndex;
 
             newFish.tag = newTag;
         }
@@ -127,26 +132,29 @@ public class FishManager : MonoBehaviour
     public void ChangeColor(GameObject newFish)
     {
         Color newColor;
-        colorIndex = newTagIndex; // Tăng màu theo vòng lặp
-        Debug.Log(colorIndex);
+        colorIndex = newTagIndex;
 
-        if (ColorUtility.TryParseHtmlString(hexColors[colorIndex-1], out newColor))
+        if (ColorUtility.TryParseHtmlString(hexColors[colorIndex - 1], out newColor))
         {
             newFish.GetComponent<SpriteRenderer>().color = newColor;
         }
 
     }
-
-    private void OnTriggerEnter2D(Collider2D collision)
+    private GameObject GetFishFromPool(Vector3 spawnPosition)
     {
-        if (collision.gameObject.tag == "water")
+        foreach (GameObject fish in fishPool)
         {
-            Debug.Log("Water");
+            if (!fish.activeInHierarchy) //Lấy con cá nào chưa được active.
+            {
+                return fish;
+            }
         }
+
+        //Tạo thêm 1 con mới vào fishPool nếu tất cả đã đc sd hết.
+        int randomIndex = Random.Range(0, 4);
+        GameObject newFish = Instantiate(fishPrefabs[randomIndex], spawnPosition, Quaternion.identity);
+        fishPool.Add(newFish);
+        return newFish;
     }
-
-
-
-
 
 }

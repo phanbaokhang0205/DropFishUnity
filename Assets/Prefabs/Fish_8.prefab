@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 25422907640036358}
   - component: {fileID: -5544053317420175482}
   - component: {fileID: 4023443544374648605}
-  - component: {fileID: 4460701765867705004}
+  - component: {fileID: 8602775838519018382}
   m_Layer: 0
   m_Name: Fish_8
   m_TagString: fish_8
@@ -105,7 +105,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -168,7 +168,7 @@ PolygonCollider2D:
       - {x: 0, y: -0.25}
       - {x: 0.5, y: 0}
   m_UseDelaunayMesh: 0
---- !u!114 &4460701765867705004
+--- !u!114 &8602775838519018382
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -177,6 +177,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 4224111845705956908}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06889abbf160dd04084231b7ff82cbd9, type: 3}
+  m_Script: {fileID: 11500000, guid: 633771d72358ada48948b71ec5e68cd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inWater: 0
+  isDropped: 0

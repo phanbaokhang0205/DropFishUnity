@@ -25,49 +25,43 @@ public class PlayerController : MonoBehaviour
         heightDrop = Screen.height / 2;
         widthDrop = Screen.width / 4;
 
-
+        touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, heightDrop, 10));
         fishManager.CreateFish(touchPosition);
     }
 
     void Update()
     {
-        //Debug.Log(fishManager.nextFish);
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
             touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, heightDrop, 10));
 
-
             if (touch.phase == TouchPhase.Began)
             {
-                if (fishManager.chosenFish) return;
+                touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, heightDrop, 10));
 
-
-                //fishManager.CreateFish(touchPosition);
             }
             else if (touch.phase == TouchPhase.Moved)
             {
-                if (fishManager.fishRb == null) return;
 
-                fishManager.movingFish(touchPosition);
+                if (fishManager.fishScript.isDropped) return;
 
                 checkDragPosition(touch);
+                
+                fishManager.movingFish(touchPosition);
+
             }
             else if (touch.phase == TouchPhase.Ended)
             {
-                if (fishManager.fishRb == null) return;
-
-                //Debug.Log(fishManager.nextFish + fishManager.chosenFish.tag);
                 fishManager.addToDroppedFishes();
-
-                //if (fishManager.nextFish)
-                //{
-                touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, heightDrop, 10));
-                fishManager.CreateFish(touchPosition);
-
-                //}
             }
 
+        }
+
+        if (fishManager.chosenFish == null)
+        {
+            touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, heightDrop, 10));
+            fishManager.CreateFish(touchPosition);
         }
     }
 
