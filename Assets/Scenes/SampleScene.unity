@@ -505,7 +505,6 @@ MonoBehaviour:
   - {fileID: 1532285030377015345, guid: bd3ca82474527c648a3f05b9d47b0c26, type: 3}
   - {fileID: 7932877743665183362, guid: 018c413a376a0c44f8b6a6c35f65e862, type: 3}
   - {fileID: 5449948860925444696, guid: 8a38a2098ae12ad4ab2949e43ac8dbc2, type: 3}
-  droppedFishes: []
   chosenFish: {fileID: 0}
   fishScript: {fileID: 0}
 --- !u!1 &464747769

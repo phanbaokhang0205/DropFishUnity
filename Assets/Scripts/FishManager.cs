@@ -18,11 +18,12 @@ public class FishManager : MonoBehaviour
 
     //Tạo ds fishPool và số lượng
     private List<GameObject> fishPool = new List<GameObject>();
-    public int poolSize = 10;
+    private int poolSize = 10;
 
     private string oldTag;
     private string newTag;
     private int newTagIndex;
+
 
 
     private string[] hexColors = {
@@ -49,7 +50,6 @@ public class FishManager : MonoBehaviour
 
     private void Start()
     {
-        //droppedFishes = new List<GameObject>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         //Tạo random trc 10 con cá sau đó ẩn đi để sử dụng sau này.
@@ -73,7 +73,6 @@ public class FishManager : MonoBehaviour
 
     public void CreateFish(Vector3 spawnPosition)
     {
-        int randomIndex = Random.Range(0, 4);
         GameObject newFish = GetFishFromPool(spawnPosition);
         newFish.transform.position = spawnPosition;
         newFish.SetActive(true);
@@ -84,12 +83,12 @@ public class FishManager : MonoBehaviour
 
     }
 
-    public void addToDroppedFishes()
+    public void DropFish()
     {
         fishScript.dropped();
     }
 
-    public void movingFish(Vector3 touchPosition)
+    public void MoveFish(Vector3 touchPosition)
     {
         chosenFish.transform.position = touchPosition;
         fishScript.prepareToDrop();
@@ -103,19 +102,72 @@ public class FishManager : MonoBehaviour
 
             if (collision1.transform.position.y > collision2.transform.position.y)
             {
+                // Kiểm tra tag của fish trước khi ẩn.
+                // Nếu tag > 4 thì set lại các thuộc tính của fish.
+                // Radome (1, 4) cho tag_id.
+                // Dùng switch case để set lại các thuộc tính cho mỗi tag_id tương ứng.
+                // return newFish sau đó setActive(false).
+
                 //Ẩn đi
+                ResetFish(collision1.tag, collision1);
                 collision1.SetActive(false);
 
 
                 collision2.transform.localScale *= 1.2f;
-                SplitTag(collision2.tag, collision2);
-                ChangeColor(collision2);
+                ChangeTag(collision2.tag, collision2);
+                ChangeColor(collision2, newTagIndex);
             }
         }
-
     }
 
-    void SplitTag(string tag, GameObject newFish)
+    void ResetFish(string tag, GameObject newFish)
+    {
+        string oldTag = tag;
+        string[] parts = oldTag.Split('_');
+
+        if (parts.Length == 2)
+        {
+            int tagIndex = int.Parse(parts[1]);
+
+            if (tagIndex > 4)
+            {
+                Debug.Log("Old tag: " +tag);
+                int randomIndex = Random.Range(1, 5); //[1 -> 4]
+                switch (randomIndex)
+                {
+                    case 1:
+                        RandomFishAgain(newFish, new Vector3(1f, 1f, 1f), parts[0], randomIndex);
+                        break;
+                    case 2:
+                        RandomFishAgain(newFish, new Vector3(1.2f, 1.2f, 1f), parts[0], randomIndex);
+                        break;
+                    case 3:
+                        RandomFishAgain(newFish, new Vector3(1.4f, 1.4f, 1f), parts[0], randomIndex);
+                        break;
+                    case 4:
+                        RandomFishAgain(newFish, new Vector3(1.6f, 1.6f, 1f), parts[0], randomIndex);
+                        break;
+                    default:
+                        Debug.Log("Không phải số 1, 2, 3, 4");
+                        break;
+                    
+                }
+
+                Debug.Log("New tag: " + newFish.tag);
+
+            }
+        }
+    }
+
+    void RandomFishAgain(GameObject newFish, Vector3 fishScale, string parts, int randomIndex)
+    {
+        newFish.transform.localScale = fishScale;
+        ChangeColor(newFish, randomIndex);
+        string newTag = parts + "_" + randomIndex;
+        newFish.tag = newTag;
+    }
+
+    void ChangeTag(string tag, GameObject newFish)
     {
         oldTag = tag;
         string[] parts = oldTag.Split('_');
@@ -129,7 +181,7 @@ public class FishManager : MonoBehaviour
             newFish.tag = newTag;
         }
     }
-    public void ChangeColor(GameObject newFish)
+    public void ChangeColor(GameObject newFish, int newTagIndex)
     {
         Color newColor;
         colorIndex = newTagIndex;
@@ -151,7 +203,7 @@ public class FishManager : MonoBehaviour
         }
 
         //Tạo thêm 1 con mới vào fishPool nếu tất cả đã đc sd hết.
-        int randomIndex = Random.Range(0, 4);
+        int randomIndex = Random.Range(0, 4); //[0 -> 3]
         GameObject newFish = Instantiate(fishPrefabs[randomIndex], spawnPosition, Quaternion.identity);
         fishPool.Add(newFish);
         return newFish;

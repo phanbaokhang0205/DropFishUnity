@@ -48,12 +48,12 @@ public class PlayerController : MonoBehaviour
 
                 checkDragPosition(touch);
                 
-                fishManager.movingFish(touchPosition);
+                fishManager.MoveFish(touchPosition);
 
             }
             else if (touch.phase == TouchPhase.Ended)
             {
-                fishManager.addToDroppedFishes();
+                fishManager.DropFish();
             }
 
         }
