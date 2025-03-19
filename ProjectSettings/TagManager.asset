@@ -16,6 +16,7 @@ TagManager:
   - fish_10
   - fish_11
   - water
+  - line
   layers:
   - Default
   - TransparentFX

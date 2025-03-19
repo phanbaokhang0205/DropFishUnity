@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 /**
  * Tạo objectPooler để tối ưu khi tạo và xóa nhiều đối tượng.
  * Cơ chế: 
@@ -42,7 +43,6 @@ public class FishManager : MonoBehaviour
     private int colorIndex;
     private SpriteRenderer spriteRenderer;
 
-
     private void Awake()
     {
         Instance = this;
@@ -60,6 +60,9 @@ public class FishManager : MonoBehaviour
             fish.SetActive(false);
             fishPool.Add(fish);
         }
+
+        
+
 
     }
 
@@ -81,6 +84,13 @@ public class FishManager : MonoBehaviour
         fishScript = newFish.GetComponent<Fish>();
         fishScript.prepareToDrop();
 
+
+    }
+
+    public void PrepareFish(Vector3 touchPosition)
+    {
+        chosenFish.transform.position = touchPosition;
+
     }
 
     public void DropFish()
@@ -92,7 +102,6 @@ public class FishManager : MonoBehaviour
     {
         chosenFish.transform.position = touchPosition;
         fishScript.prepareToDrop();
-
     }
 
     public void MergeFish(GameObject collision1, GameObject collision2)
