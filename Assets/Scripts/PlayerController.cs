@@ -10,30 +10,45 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public GameObject line;
+    public GameObject fishTank;
 
     private FishManager fishManager;
     private Vector3 touchPosition;
     private Touch touch;
 
     private int heightDrop;
-    private int widthDrop;
     private Renderer rendLine;
     private Vector3 targetCenter;
+
+    //fishTank
+    private CompositeCollider2D rendTank;
+    private float tankWidth;
+    private float tankHeight;
+    private float minTank;
+    private float maxTank;
 
     private void Start()
     {
         fishManager = FishManager.Instance;
 
         heightDrop = Screen.height / 2;
-        widthDrop = Screen.width / 4;
 
         touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, heightDrop, 10));
         fishManager.CreateFish(touchPosition);
 
+        //line to drop fish
         rendLine = line.GetComponent<Renderer>();
         targetCenter = fishManager.chosenFish.GetComponent<Renderer>().bounds.center;
 
+        //fishtank
+        rendTank = fishTank.GetComponent<CompositeCollider2D>();
+        tankWidth = rendTank.bounds.size.x - 3;
+        tankHeight = rendTank.bounds.size.y;
+        minTank = -(tankWidth / 2);
+        maxTank = tankWidth / 2;
+
         setLinePosition();
+
     }
 
     void Update()
@@ -43,20 +58,21 @@ public class PlayerController : MonoBehaviour
         {
             touch = Input.GetTouch(0);
             touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, heightDrop, 10));
-            
+
             if (touch.phase == TouchPhase.Began)
             {
                 if (fishManager.fishScript.isDropped) return;
 
                 fishManager.PrepareFish(touchPosition);
+                checkPosition();
                 setLinePosition();
             }
             else if (touch.phase == TouchPhase.Moved)
             {
                 if (fishManager.fishScript.isDropped) return;
 
-                checkDragPosition(touch);
                 fishManager.MoveFish(touchPosition);
+                checkPosition();
                 setLinePosition();
             }
             else if (touch.phase == TouchPhase.Ended)
@@ -71,24 +87,28 @@ public class PlayerController : MonoBehaviour
         {
             touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width / 2, heightDrop, 10));
             fishManager.CreateFish(touchPosition);
-            
+
             setLinePosition();
         }
     }
 
-    void checkDragPosition(Touch touch)
+    void checkPosition()
     {
         Vector3 newPosition = fishManager.chosenFish.transform.position;
 
-        if (touch.position.x <= widthDrop)
+        if (newPosition.x <= minTank)
         {
-            newPosition.x = Camera.main.ScreenToWorldPoint(new Vector3(widthDrop, touch.position.y, 10)).x;
+            newPosition.x = minTank;
             fishManager.chosenFish.transform.position = newPosition;
+            Debug.Log("x: " + newPosition.x);
+
         }
-        else if (touch.position.x >= Screen.width - widthDrop)
+        else if (newPosition.x >= maxTank)
         {
-            newPosition.x = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width - widthDrop, touch.position.y, 10)).x;
+            newPosition.x = maxTank;
             fishManager.chosenFish.transform.position = newPosition;
+            Debug.Log("x: " + newPosition.x);
+
         }
     }
 

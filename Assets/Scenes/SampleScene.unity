@@ -482,6 +482,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   line: {fileID: 1530901951}
+  fishTank: {fileID: 1343292185}
 --- !u!114 &328471143
 MonoBehaviour:
   m_ObjectHideFlags: 0
